@@ -1,0 +1,61 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background: #EEE;
+}
+
+.container{
+    width: 95vw;
+    margin: auto;
+    background: #fff;
+}
+
+.past_matches{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.past_matches h1{
+    width: 100%;
+}
+
+.match{
+    width: 30em;
+    padding: 2em;
+    border: 1px solid black;
+}
+.match h2,h3{
+    display: inline-block;
+    width: 50%;
+}
+
+.match h3{
+    position: relative;
+    left: 5em;
+}
+
+.match h4{
+    margin-left: 4em;
+    margin-top: 1em;
+}
+
+.match button{
+    padding: 1em;
+    margin-top: 1.5em;
+    width: 12em;
+    margin-left: 4em;
+}
+
+.match input{
+    margin: 1em;
+    width: 4em;
+    padding: 0.3em 0.2em;
+}
+
+.hidden{
+    display: none;
+}
