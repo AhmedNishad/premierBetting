@@ -60,8 +60,8 @@ function createCurrentMatchElement(m){
     let homeScore = document.createElement('h3');
 
     awayTeam.innerHTML = m.match_awayteam_name;
-    homeTeam.innerHTML = m.match_hometeam_name + '-';
-    homeScore.textContent = m.match_hometeam_score + '-';
+    homeTeam.innerHTML = m.match_hometeam_name ;
+    homeScore.textContent = m.match_hometeam_score;
     awayScore.textContent = m.match_awayteam_score
 
     match.classList.add('match');
@@ -81,11 +81,54 @@ function createCurrentMatches(matches){
         
         return parseInt(m.match_hometeam_score,10) > -1;
     })
+
+    let matchesWithPrediction = matchesWithScore.filter(e=>{
+        return localStorage.getItem(e.match_id)
+    })
+    if(matchesWithPrediction.length > 1){
+    createPredictedMatches(matchesWithPrediction);
+    }
     console.log(matchesWithScore)
     matchesWithScore.forEach(element => {
         createCurrentMatchElement(element)
     });
 }
+
+let predictionContainer = document.querySelector('.results')
+
+function createPredictedMatches(p_matches){
+    predictionContainer.classList.remove('hidden')
+
+    p_matches.forEach(m=>{
+
+    let p_match = document.createElement('div');
+
+    let awayTeam = document.createElement('h2');
+    let homeTeam = document.createElement('h2');
+    let awayScore = document.createElement('h3');
+    let homeScore = document.createElement('h3');
+    let predictionText = document.createElement('h4')
+
+    predictionText.innerHTML = localStorage.getItem(m.match_id)
+
+    awayTeam.innerHTML = m.match_awayteam_name;
+    homeTeam.innerHTML = m.match_hometeam_name ;
+    homeScore.textContent = m.match_hometeam_score;
+    awayScore.textContent = m.match_awayteam_score
+
+    p_match.classList.add('match');
+    
+    p_match.appendChild(homeTeam);
+    p_match.appendChild(awayTeam);
+    p_match.appendChild(homeScore);
+    p_match.appendChild(awayScore);
+
+    p_match.appendChild(predictionText);
+
+    predictionContainer.appendChild(p_match)
+    })
+}
+
 
 // Upcoming Matches
 
@@ -131,25 +174,36 @@ function createUpcomingMatchElement(m){
     let upcoming = document.createElement('div')
 
     upcoming.classList.add('match');
+    upcoming.setAttribute('match_id', m.match_id)
+    
 
     let awayTeam = document.createElement('h2');
     let homeTeam = document.createElement('h2');
     let matchDate = document.createElement('h4');
     let predictButton = document.createElement('button')
 
-    predictButton.innerText = "predict"
+    awayTeam.setAttribute('away_name', m.match_awayteam_name)
+    homeTeam.setAttribute('home_name', m.match_hometeam_name)
 
-    // Add onclick listener to predict button
+    predictButton.innerText = "predict"
 
     awayTeam.innerHTML = m.match_awayteam_name;
     homeTeam.innerHTML = m.match_hometeam_name + '-';
     matchDate.textContent = m.match_date;
 
-
     upcoming.appendChild(homeTeam);
     upcoming.appendChild(awayTeam)
     upcoming.appendChild(matchDate)
     upcoming.appendChild(predictButton)
+
+    // Check if prediction already made
+
+    if(localStorage.getItem(m.match_id)){
+        predictButton.classList.add('hidden')
+        let predictionEl = document.createElement('h3');
+        predictionEl.innerHTML = localStorage.getItem(m.match_id);
+        upcoming.appendChild(predictionEl)
+    }
 
     upcomingContainer.appendChild(upcoming)
 }
@@ -159,28 +213,87 @@ function createUpcomingMatchElement(m){
 function addPredictButtonListeners(){
     document.querySelector('body').addEventListener('click', function(event) {
         if (event.target.tagName.toLowerCase() === 'button') {
-          createPredictionForm(event.target.parentElement)
-          event.target.classList.add('hidden')
+            if(event.target.textContent === "predict"){
+                createPredictionForm(event.target.parentElement)
+                event.target.classList.add('hidden')
+            } else{
+                submitPrediction(event.target.parentElement)
+                addPredictionToStorage(event.target.parentElement)
+            }
         }
       });
 }
 
 
 function createPredictionForm(parent){
-    let form = document.createElement('form')
+    let form = document.createElement('div')
 
     let homeScore = document.createElement('input')
     let awayScore = document.createElement('input')
-    let submit_btn = document.createElement('button')
+    let button = document.createElement('button')
 
     homeScore.setAttribute('type', 'number')
     awayScore.setAttribute('type', 'number')
 
-    submit_btn.textContent = 'Make Prediction'
+    //button.removeAttribute('type')
+
+    button.innerText = "submit"
 
     form.appendChild(homeScore)
     form.appendChild(awayScore)
-    form.appendChild(submit_btn)
+    form.appendChild(button)
 
     parent.appendChild(form)
 }
+
+// Submit Prediction logic
+
+function submitPrediction(submission){
+    if(submission.children[0].value == "" || submission.children[1].value == ""){
+        console.log('value required')
+    }else{
+        createSuccessElement(submission);
+    }
+
+}
+
+
+function createSuccessElement(element){
+    let inputEl = element.children;
+    for(let i=0; i<inputEl.length; i++){
+        inputEl[i].classList.add('hidden')
+    }
+
+    let success = document.createElement('h2')
+    success.innerText = "Prediction Made"
+    
+    element.appendChild(success);
+}
+
+function predictText(el){
+    let matchP = el.parentElement;
+
+    console.log(matchP.children[1])
+
+    let hTeam = matchP.children[0].getAttribute('home_name');
+    let aTeam = matchP.children[1].getAttribute('away_name');
+    let pAScore = el.children[1].value;
+    let pHScore = el.children[0].value;
+
+   
+
+    let str = "You've predicted that " + hTeam + " will " + " score " + pHScore + " and " + aTeam + " will score " + pAScore;
+
+    return str;
+}
+
+
+function addPredictionToStorage(element){
+    let matchId = element.parentElement.getAttribute('match_id')
+    let prediction = predictText(element)
+    
+    localStorage.setItem(matchId, prediction)
+    console.log(localStorage.getItem(matchId))
+}
+
+

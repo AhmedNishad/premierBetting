@@ -17,6 +17,7 @@ body{
 .past_matches{
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 .past_matches h1{
@@ -24,9 +25,12 @@ body{
 }
 
 .match{
-    width: 30em;
+    width: 25em;
     padding: 2em;
-    border: 1px solid black;
+    margin: 0.5em;
+    flex-grow: 1.05;
+    background: #EEE;
+    max-width: 40em;
 }
 .match h2,h3{
     display: inline-block;
@@ -48,14 +52,39 @@ body{
     margin-top: 1.5em;
     width: 12em;
     margin-left: 4em;
+    font-size: 0.9em;
 }
 
 .match input{
     margin: 1em;
-    width: 4em;
-    padding: 0.3em 0.2em;
+    width: 3em;
+    padding: 0.7em 0.2em;
+    font-size: 1.2em;
 }
 
 .hidden{
     display: none;
+}
+
+.upcoming_matches{
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    
+    justify-content: space-between;
+}
+
+.upcoming_matches h1{
+    flex-basis: 100%;
+}
+
+.upcoming_matches .match{
+    flex-grow: 1.2;
+}
+
+.upcoming_matches h3{
+    
+    width: 80%;
+    padding: 1em;
+    color: rgb(24, 87, 87);
 }
