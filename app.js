@@ -107,9 +107,56 @@ function createPredictedMatches(p_matches){
     let homeTeam = document.createElement('h2');
     let awayScore = document.createElement('h3');
     let homeScore = document.createElement('h3');
-    let predictionText = document.createElement('h4')
+    let predictionEl = document.createElement('h4')
 
-    predictionText.innerHTML = localStorage.getItem(m.match_id)
+    predictionEl.classList.add('prediction')
+
+    let predictionObj = JSON.parse(localStorage.getItem(m.match_id))
+
+    predictionEl.innerHTML = predictionText(predictionObj)
+
+
+    function predictionText(p_obj){
+        let str = "";
+        let homePoints;
+        let awayPoints;
+        let points = homePoints + awayPoints;
+        
+        if(homeScore == p_obj.homeScore){
+            str += "Congratulations you got the home score right +"
+            homePoints += 50;
+        } else if(homeScore < p_obj.homeScore){
+            str+= "You got the home score off by " + (p_obj.homeScore - homeScore) + " goals +"
+            homePoints += (Math.abs(homeScore-p_obj.homeScore)/ homeScore) * 50
+        } else{
+            str+= "You got the home score off by " + (homeScore - p_obj.homeScore ) + " goals +"
+            homePoints += (Math.abs(homeScore-p_obj.homeScore)/ homeScore) * 50
+        }
+        str += homePoints
+
+        if(awayScore == p_obj.awayScore){
+            str += "\nCongratulations you got the away score right +"
+            awayPoints += 50
+        } else if(awayScore < p_obj.awayScore){
+            str+= "\nYou got the away score off by " + (p_obj.awayScore - awayScore) + " goals +"
+            awayPoints += (Math.abs(awayScore-p_obj.awayScore)/ awayScore) * 50
+        } else{
+            str+= "\nYou got the away score off by " + (awayScore - p_obj.awayScore ) + " goals +"
+            awayPoints += (Math.abs(awayScore-p_obj.awayScore)/ awayScore) * 50
+        }
+        str += awayPoints
+        addPoints(points);
+        return str;
+    }
+
+    function addPoints(points){
+        let pointsEl = document.querySelector('.points')
+        let currentPoints = parseInt(pointsEl.textContent, 10)
+
+        pointsEl.textContent = (currentPoints + points)
+    }
+
+    
 
     awayTeam.innerHTML = m.match_awayteam_name;
     homeTeam.innerHTML = m.match_hometeam_name ;
@@ -143,7 +190,7 @@ function upcomingDate(){
     }else{
         start += d.getFullYear() + '-'
         start += (d.getMonth() + 2) + '-'
-        start += 30  - d.getDate() ;
+        start += 10-(30 - d.getDate() ) ;
     }
     return start;
 }
@@ -188,7 +235,7 @@ function createUpcomingMatchElement(m){
     predictButton.innerText = "predict"
 
     awayTeam.innerHTML = m.match_awayteam_name;
-    homeTeam.innerHTML = m.match_hometeam_name + '-';
+    homeTeam.innerHTML = m.match_hometeam_name ;
     matchDate.textContent = m.match_date;
 
     upcoming.appendChild(homeTeam);
@@ -200,8 +247,19 @@ function createUpcomingMatchElement(m){
 
     if(localStorage.getItem(m.match_id)){
         predictButton.classList.add('hidden')
-        let predictionEl = document.createElement('h3');
-        predictionEl.innerHTML = localStorage.getItem(m.match_id);
+        let predictionEl = document.createElement('div');
+        predictionEl.classList.add('prediction')
+        let p_obj = JSON.parse(localStorage.getItem(m.match_id))
+
+        let ph_score =  document.createElement('h3')
+        ph_score.innerHTML = p_obj.homeScore;
+
+        let pa_score =  document.createElement('h3')
+        pa_score.innerHTML = p_obj.awayScore;
+
+        predictionEl.appendChild(ph_score);
+        predictionEl.appendChild(pa_score)
+
         upcoming.appendChild(predictionEl)
     }
 
@@ -270,7 +328,7 @@ function createSuccessElement(element){
     element.appendChild(success);
 }
 
-function predictText(el){
+function predictObj(el){
     let matchP = el.parentElement;
 
     console.log(matchP.children[1])
@@ -281,19 +339,24 @@ function predictText(el){
     let pHScore = el.children[0].value;
 
    
+    let obj = {
+        homeTeam: hTeam,
+        awayTeam: aTeam,
+        awayScore: pAScore,
+        homeScore: pHScore
+    }
+    //let str = "You've predicted that " + hTeam + " will " + " score " + pHScore + " and " + aTeam + " will score " + pAScore;
 
-    let str = "You've predicted that " + hTeam + " will " + " score " + pHScore + " and " + aTeam + " will score " + pAScore;
-
-    return str;
+    return obj;
 }
 
 
 function addPredictionToStorage(element){
     let matchId = element.parentElement.getAttribute('match_id')
-    let prediction = predictText(element)
+    let prediction = predictObj(element)
     
-    localStorage.setItem(matchId, prediction)
-    console.log(localStorage.getItem(matchId))
+    localStorage.setItem(matchId, JSON.stringify(prediction))
+    console.log(JSON.parse(localStorage.getItem(matchId)))
 }
 
 
