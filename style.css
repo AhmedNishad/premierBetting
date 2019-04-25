@@ -108,5 +108,16 @@ header{
 
 .points{
     padding: 0.9em;
+    font-size: 1.2em;
     display: inline-block;
+    color: rgb(8, 103, 141);
+}
+
+.results{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.results h1{
+    flex-basis: 100%;
 }

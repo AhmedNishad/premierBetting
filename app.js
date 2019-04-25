@@ -41,7 +41,7 @@ let none_current = document.querySelector('#none_current')
 fetch(url_current)
 .then(req=> req.json())
 .then(data => {
-    console.log(data)
+    //console.log(data)
     createCurrentMatches(data)
 }).catch(err=> {
     console.log(err)
@@ -78,17 +78,16 @@ function createCurrentMatchElement(m){
 
 function createCurrentMatches(matches){
     let matchesWithScore = matches.filter(m=>{
-        
         return parseInt(m.match_hometeam_score,10) > -1;
+        
     })
 
     let matchesWithPrediction = matchesWithScore.filter(e=>{
-        return localStorage.getItem(e.match_id)
+        return localStorage.getItem(e.match_id) !=  null
     })
     if(matchesWithPrediction.length > 1){
     createPredictedMatches(matchesWithPrediction);
     }
-    console.log(matchesWithScore)
     matchesWithScore.forEach(element => {
         createCurrentMatchElement(element)
     });
@@ -113,55 +112,78 @@ function createPredictedMatches(p_matches){
 
     let predictionObj = JSON.parse(localStorage.getItem(m.match_id))
 
-    predictionEl.innerHTML = predictionText(predictionObj)
-
-
-    function predictionText(p_obj){
-        let str = "";
-        let homePoints;
-        let awayPoints;
-        let points = homePoints + awayPoints;
-        
-        if(homeScore == p_obj.homeScore){
-            str += "Congratulations you got the home score right +"
-            homePoints += 50;
-        } else if(homeScore < p_obj.homeScore){
-            str+= "You got the home score off by " + (p_obj.homeScore - homeScore) + " goals +"
-            homePoints += (Math.abs(homeScore-p_obj.homeScore)/ homeScore) * 50
-        } else{
-            str+= "You got the home score off by " + (homeScore - p_obj.homeScore ) + " goals +"
-            homePoints += (Math.abs(homeScore-p_obj.homeScore)/ homeScore) * 50
-        }
-        str += homePoints
-
-        if(awayScore == p_obj.awayScore){
-            str += "\nCongratulations you got the away score right +"
-            awayPoints += 50
-        } else if(awayScore < p_obj.awayScore){
-            str+= "\nYou got the away score off by " + (p_obj.awayScore - awayScore) + " goals +"
-            awayPoints += (Math.abs(awayScore-p_obj.awayScore)/ awayScore) * 50
-        } else{
-            str+= "\nYou got the away score off by " + (awayScore - p_obj.awayScore ) + " goals +"
-            awayPoints += (Math.abs(awayScore-p_obj.awayScore)/ awayScore) * 50
-        }
-        str += awayPoints
-        addPoints(points);
-        return str;
-    }
-
-    function addPoints(points){
-        let pointsEl = document.querySelector('.points')
-        let currentPoints = parseInt(pointsEl.textContent, 10)
-
-        pointsEl.textContent = (currentPoints + points)
-    }
-
     
 
     awayTeam.innerHTML = m.match_awayteam_name;
     homeTeam.innerHTML = m.match_hometeam_name ;
     homeScore.textContent = m.match_hometeam_score;
     awayScore.textContent = m.match_awayteam_score
+
+    predictionEl.innerText = predictionText(predictionObj)
+
+
+    function predictionText(p_obj){
+        let str = "";
+        let homePoints = 0;
+        let awayPoints = 0;
+        
+
+        let predictedHomeScore = parseInt(p_obj.homeScore,10)
+        
+        let predictedAwayScore = parseInt(p_obj.awayScore,10)
+
+        let actualHomeScore = parseInt(homeScore.textContent, 10)
+        let actualAwayScore = parseInt(awayScore.innerHTML, 10)
+        
+        if(actualHomeScore == predictedHomeScore){
+            str += "Congratulations you got the home score right +"
+            homePoints += 50;
+        } else if(actualHomeScore < predictedHomeScore){
+            str+= "You got the home score off by " + (predictedHomeScore - actualHomeScore) + " goals +"
+            if(actualHomeScore> 0)
+            homePoints += Math.floor((Math.abs(actualHomeScore-predictedHomeScore)/ actualHomeScore) * 50)
+        } else{
+            str+= "You got the home score off by " + (actualHomeScore - predictedHomeScore ) + " goals +"
+            if(actualHomeScore> 0)
+            homePoints += Math.floor((Math.abs(actualHomeScore-predictedHomeScore)/ actualHomeScore) * 50)
+        }
+        str += homePoints
+
+        if(actualAwayScore == predictedAwayScore){
+            str += "\nCongratulations you got the away score right +"
+            awayPoints += 50
+        } else if(actualAwayScore < predictedAwayScoree){
+            str+= "\nYou got the away score off by " + (predictedAwayScore- actualAwayScore) + " goals +"
+            if(actualHomeScore> 0)
+            awayPoints += Math.floor((Math.abs(actualAwayScore-predictedAwayScore)/ actualAwayScore) * 50)
+        } else{
+            str+= "\nYou got the away score off by " + (actualAwayScore - predictedAwayScore ) + " goals +"
+            if(actualHomeScore> 0)
+            awayPoints += Math.floor((Math.abs(actualAwayScore-predictedAwayScore)/ actualAwayScore) * 50)
+        }
+        str += awayPoints
+
+        let points = Math.floor(homePoints) + Math.floor(awayPoints);
+
+        addPoints(points);
+        console.log(points)
+        return str;
+    }
+
+    function addPoints(points){
+        let pointsEl = document.querySelector('.points')
+        if(pointsEl.textContent != ""){
+            let currentPoints = parseInt(pointsEl.textContent, 10)
+            console.log(currentPoints)
+            pointsEl.textContent = (currentPoints + points)
+        }else{
+            pointsEl.textContent = (0 + points)
+        }
+    }
+
+    
+
+    
 
     p_match.classList.add('match');
     
@@ -170,7 +192,7 @@ function createPredictedMatches(p_matches){
     p_match.appendChild(homeScore);
     p_match.appendChild(awayScore);
 
-    p_match.appendChild(predictionText);
+    p_match.appendChild(predictionEl);
 
     predictionContainer.appendChild(p_match)
     })
